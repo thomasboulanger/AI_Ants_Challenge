@@ -117,13 +117,13 @@ void Bot::doTurn()
     state.bug << endl;
 #endif
 
-    vector<Route>::iterator routeIt;
-    for (routeIt = foodRoutes.begin(); routeIt < foodRoutes.end(); ++routeIt)
+    vector<Route>::iterator routeIterator;
+    for (routeIterator = foodRoutes.begin(); routeIterator < foodRoutes.end(); ++routeIterator)
     {
-        if (!targets.containsKey(get<1>(*routeIt))) // food already queried?
+        if (!targets.containsKey(get<1>(*routeIterator))) // food already queried?
         {
-            if (!targets.containsValue(get<0>(*routeIt))) // ant already doing something?
-                if (doMoveLocation(get<0>(*routeIt), get<1>(*routeIt)))
+            if (!targets.containsValue(get<0>(*routeIterator))) // ant already doing something?
+                if (doMoveLocation(get<0>(*routeIterator), get<1>(*routeIterator)))
                 {
 #ifdef DEBUG
                     state.bug << ">> Added move from " << get<0>( *routeIt ) << " to " 
@@ -171,32 +171,35 @@ void Bot::doTurn()
 
             sort(unseenRoutes.begin(), unseenRoutes.end(), cmpRoutes);
 
-            for (routeIt = unseenRoutes.begin(); routeIt != unseenRoutes.end(); ++routeIt)
-                if (doMoveLocation(get<0>(*routeIt), get<1>(*routeIt))) break;
+            for (routeIterator = unseenRoutes.begin(); routeIterator != unseenRoutes.end(); ++routeIterator)
+                if (doMoveLocation(get<0>(*routeIterator), get<1>(*routeIterator))) break;
         }
     }
 
     // Move out from our hills
-    for (hillIterator = state.myHills.begin(); hillIterator != state.myHills.end(); ++hillIterator)
+    for (Location hillLoc : state.myHills)
     {
-        vector<Location>::iterator it = find(state.myAnts.begin(), state.myAnts.end(), *hillIterator);
-        if (it != state.myAnts.end())
+        for (Location antLoc : state.myAnts)
         {
-            // Check that we are not already moving the ant
-            movingOut = false;
-            for (ordersIterator = orders.begin(); ordersIterator != orders.end(); ++ordersIterator)
-                if (ordersIterator->second == *hillIterator)
-                {
-                    movingOut = true;
-                    break;
-                }
-
-            if (!movingOut)
-                for (int d = 0; d < TDIRECTIONS; ++d)
-                {
-                    if (doMoveDirection(*hillIterator, d))
+            vector<Location>::iterator it = find(state.myHills.begin(), state.myHills.end(), antLoc);
+            if (it != state.myHills.end())
+            {
+                // Check that we are not already moving the ant
+                movingOut = false;
+                for (ordersIterator = orders.begin(); ordersIterator != orders.end(); ++ordersIterator)
+                    if (ordersIterator->second == antLoc)
+                    {
+                        movingOut = true;
                         break;
-                }
+                    }
+
+                if (!movingOut)
+                    for (int d = 0; d < TDIRECTIONS; ++d)
+                    {
+                        if (doMoveDirection(antLoc, d))
+                            break;
+                    }
+            }
         }
     }
 };
