@@ -6,6 +6,8 @@
 using namespace std;
 
 template <class TKey, class TValue>
+
+//this script create 2 map of the game one in key/value order and one in value/key that both information are reachable from the other information
 class Bimap
 {
 public:

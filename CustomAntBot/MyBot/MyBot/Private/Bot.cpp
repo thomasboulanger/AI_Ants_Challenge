@@ -29,7 +29,8 @@ void Bot::playGame()
     }
 };
 
-//makes the bots moves for the turn
+//deprecated//
+//makes the bots moves for the turn 
 void Bot::makeMoves()
 {
     state.bug << "turn " << state.turn << ":" << endl;
@@ -52,6 +53,7 @@ void Bot::makeMoves()
 
     state.bug << "time taken: " << state.timer.getTime() << "ms" << endl << endl;
 };
+//deprecated//
 
 bool Bot::doMoveDirection(const Location& antPos, int dir)
 {
@@ -68,7 +70,7 @@ bool Bot::doMoveDirection(const Location& antPos, int dir)
 
 bool Bot::doMoveLocation(const Location& antPos, const Location& destinationPos)
 {
-    array<int, 2> directions; // Initialization
+    array<int, 2> directions{}; // Initialization
 
     int ndirs = state.getDirection(antPos, destinationPos, directions);
     for (int i = 0; i < ndirs; ++i)
@@ -81,10 +83,12 @@ bool Bot::doMoveLocation(const Location& antPos, const Location& destinationPos)
     return false;
 };
 
+//game logic for each ant on each turns
 void Bot::doTurn()
 {
+    //variable initialization
     int distance = 0;
-    const UINT nFood = state.food.size(), nMyAnts = state.myAnts.size();
+    const size_t nFood = state.food.size(), nMyAnts = state.myAnts.size();
     Route route;
     vector<Route> foodRoutes(nFood * nMyAnts, make_tuple(Location(), Location(), 0));
     vector<Location>::iterator hillIterator;
@@ -99,8 +103,8 @@ void Bot::doTurn()
         orders.insert(pair<Location, Location>(*hillIterator, Location()));
 
     // Food gathering
-    for (UINT foodIdx = 0; foodIdx < nFood; ++foodIdx)
-        for (UINT antIdx = 0; antIdx < nMyAnts; ++antIdx)
+    for (size_t foodIdx = 0; foodIdx < nFood; ++foodIdx)
+        for (size_t antIdx = 0; antIdx < nMyAnts; ++antIdx)
         {
             distance = state.distance(state.myAnts[antIdx], state.food[foodIdx]);
             route = make_tuple(state.myAnts[antIdx], state.food[foodIdx], distance);
@@ -112,7 +116,7 @@ void Bot::doTurn()
 #ifdef DEBUG
     state.bug << ">> " << nMyAnts*nFood << " routes computed!" << endl << endl;
     state.bug << ">> Sorted routes:" << endl;
-    for ( uint routeIdx = 0 ; routeIdx < nFood*nMyAnts ; ++routeIdx )
+    for (size_t routeIdx = 0 ; routeIdx < nFood*nMyAnts ; ++routeIdx )
         state.bug << ">>>> " << foodRoutes[ routeIdx ] << endl;
     state.bug << endl;
 #endif
@@ -148,7 +152,7 @@ void Bot::doTurn()
 
     // Explore unseen areas
     vector<Route> unseenRoutes(unseen.size(), make_tuple(Location(), Location(), 0));
-    for (UINT antIdx = 0; antIdx < state.myAnts.size(); ++antIdx)
+    for (size_t antIdx = 0; antIdx < state.myAnts.size(); ++antIdx)
     {
         // Check that we are not already moving the ant
         movingOut = false;
@@ -175,33 +179,57 @@ void Bot::doTurn()
                 if (doMoveLocation(get<0>(*routeIterator), get<1>(*routeIterator))) break;
         }
     }
-
+    
     // Move out from our hills
-    for (Location hillLoc : state.myHills)
+    for (hillIterator = state.myHills.begin(); hillIterator != state.myHills.end(); ++hillIterator)
     {
-        for (Location antLoc : state.myAnts)
+        vector<Location>::iterator it = find(state.myAnts.begin(), state.myAnts.end(), *hillIterator);
+        if (it != state.myAnts.end())
         {
-            vector<Location>::iterator it = find(state.myHills.begin(), state.myHills.end(), antLoc);
-            if (it != state.myHills.end())
-            {
-                // Check that we are not already moving the ant
-                movingOut = false;
-                for (ordersIterator = orders.begin(); ordersIterator != orders.end(); ++ordersIterator)
-                    if (ordersIterator->second == antLoc)
-                    {
-                        movingOut = true;
-                        break;
-                    }
+            // Check that we are not already moving the ant
+            movingOut = false;
+            for (ordersIterator = orders.begin(); ordersIterator != orders.end(); ++ordersIterator)
+                if (ordersIterator->second == *hillIterator)
+                {
+                    movingOut = true;
+                    break;
+                }
 
-                if (!movingOut)
-                    for (int d = 0; d < TDIRECTIONS; ++d)
-                    {
-                        if (doMoveDirection(antLoc, d))
-                            break;
-                    }
-            }
+            if (!movingOut)
+                for (int d = 0; d < TDIRECTIONS; ++d)
+                {
+                    if (doMoveDirection(*hillIterator, d))
+                        break;
+                }
         }
     }
+
+    // // Move out from our hills
+    // for (Location hillLoc : state.myHills)
+    // {
+    //     for (Location antLoc : state.myAnts)
+    //     {
+    //         vector<Location>::iterator it = find(state.myHills.begin(), state.myHills.end(), antLoc);
+    //         if (it != state.myHills.end())
+    //         {
+    //             // Check that we are not already moving the ant
+    //             movingOut = false;
+    //             for (ordersIterator = orders.begin(); ordersIterator != orders.end(); ++ordersIterator)
+    //                 if (ordersIterator->second == antLoc)
+    //                 {
+    //                     movingOut = true;
+    //                     break;
+    //                 }
+    //
+    //             if (!movingOut)
+    //                 for (int d = 0; d < TDIRECTIONS; ++d)
+    //                 {
+    //                     if (doMoveDirection(antLoc, d))
+    //                         break;
+    //                 }
+    //         }
+    //     }
+    // }
 };
 
 bool Bot::cmpRoutes(const Route& lhs, const Route& rhs)

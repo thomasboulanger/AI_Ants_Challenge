@@ -93,7 +93,7 @@ int State::getDirection
 
 bool State::isFree(const Location& loc)
 {
-    for (UINT antIdx = 0; antIdx < myAnts.size(); ++antIdx)
+    for (size_t antIdx = 0; antIdx < myAnts.size(); ++antIdx)
         if (grid[loc.x][loc.y].isWater || loc == myAnts[antIdx])
             return false;
 
@@ -114,7 +114,7 @@ void State::updateVisionInformation()
     std::queue<Location> locQueue;
     Location sLoc, cLoc, nLoc;
 
-    for (UINT antIdx = 0; antIdx < myAnts.size(); ++antIdx)
+    for (size_t antIdx = 0; antIdx < myAnts.size(); ++antIdx)
     {
         sLoc = myAnts[antIdx];
         locQueue.push(sLoc);

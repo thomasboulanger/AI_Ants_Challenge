@@ -13,9 +13,8 @@
 using namespace std;
 typedef tuple< Location, Location, double > Route;
 
-/*
-    This struct represents your bot in the game of Ants
-*/
+
+//This Script represents your bot in the game of Ants
 struct Bot
 {
     State state;

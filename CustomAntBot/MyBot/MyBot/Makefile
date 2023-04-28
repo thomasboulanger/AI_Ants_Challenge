@@ -6,8 +6,8 @@ SOURCES=$(wildcard $(SRC_DIR)/*.cpp)
 OBJECTS=$(addsuffix .o, $(basename ${SOURCES}))
 EXECUTABLE=MyBot.exe
 
-#Uncomment the following to enable debugging
-#CFLAGS+=-g -DDEBUG
+#comment the following to disable debugging
+CFLAGS+=-g -DDEBUG
 
 all: $(OBJECTS) $(EXECUTABLE)
 
