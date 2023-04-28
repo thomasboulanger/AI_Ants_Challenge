@@ -24,36 +24,9 @@ void Bot::playGame()
     {
         state.updateVisionInformation();
         doTurn();
-        //makeMoves();
         endTurn();
     }
 };
-
-//deprecated//
-//makes the bots moves for the turn 
-void Bot::makeMoves()
-{
-    state.bug << "turn " << state.turn << ":" << endl;
-    state.bug << state << endl;
-
-    //picks out moves for each ant
-    for (int ant = 0; ant < (int)state.myAnts.size(); ant++)
-    {
-        for (int dir = 0; dir < TDIRECTIONS; dir++)
-        {
-            Location antPos = state.getLocation(state.myAnts[ant], dir);
-
-            if (!state.grid[antPos.x][antPos.y].isWater)
-            {
-                state.makeMove(state.myAnts[ant], dir);
-                break;
-            }
-        }
-    }
-
-    state.bug << "time taken: " << state.timer.getTime() << "ms" << endl << endl;
-};
-//deprecated//
 
 bool Bot::doMoveDirection(const Location& antPos, int dir)
 {
@@ -83,7 +56,7 @@ bool Bot::doMoveLocation(const Location& antPos, const Location& destinationPos)
     return false;
 };
 
-//game logic for each ant on each turns
+//game logic for each ant on each turn
 void Bot::doTurn()
 {
     //variable initialization
@@ -139,13 +112,13 @@ void Bot::doTurn()
     // Remove the locations that are visible
     state.bug << "there are " << unseen.size() << " unseen locations here" << endl;
 
-    set<Location>::iterator unseenIt = unseen.begin();
-    while (unseenIt != unseen.end())
+    set<Location>::iterator unseenIterator = unseen.begin();
+    while (unseenIterator != unseen.end())
     {
-        if (state.grid[unseenIt->x][unseenIt->y].isVisible)
-            unseen.erase(unseenIt++);
+        if (state.grid[unseenIterator->x][unseenIterator->y].isVisible)
+            unseen.erase(unseenIterator++);
         else
-            ++unseenIt;
+            ++unseenIterator;
     }
 
     state.bug << "there are " << unseen.size() << " unseen locations here" << endl;
@@ -166,10 +139,10 @@ void Bot::doTurn()
         if (!movingOut)
         {
             int i;
-            for (i = 0, unseenIt = unseen.begin(); unseenIt != unseen.end(); ++unseenIt)
+            for (i = 0, unseenIterator = unseen.begin(); unseenIterator != unseen.end(); ++unseenIterator)
             {
-                distance = state.distance(state.myAnts[antIdx], *unseenIt);
-                route = make_tuple(state.myAnts[antIdx], *unseenIt, distance);
+                distance = state.distance(state.myAnts[antIdx], *unseenIterator);
+                route = make_tuple(state.myAnts[antIdx], *unseenIterator, distance);
                 unseenRoutes[i++] = route;
             }
 
@@ -190,7 +163,7 @@ void Bot::doTurn()
             movingOut = false;
             for (ordersIterator = orders.begin(); ordersIterator != orders.end(); ++ordersIterator)
                 if (ordersIterator->second == *hillIterator)
-                {
+                {   
                     movingOut = true;
                     break;
                 }
