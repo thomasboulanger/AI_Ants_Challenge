@@ -376,10 +376,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Public\Astar.h" />
     <ClInclude Include="Public\Bimap.h" />
     <ClInclude Include="Public\Bot.h" />
     <ClInclude Include="Public\Bug.h" />
     <ClInclude Include="Public\Location.h" />
+    <ClInclude Include="Public\map.h" />
     <ClInclude Include="Public\Square.h" />
     <ClInclude Include="Public\State.h" />
     <ClInclude Include="Public\Timer.h" />

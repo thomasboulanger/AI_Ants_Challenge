@@ -24,6 +24,8 @@ using namespace std;
 const int TDIRECTIONS = 4;
 const char CDIRECTIONS[4] = {'N', 'E', 'S', 'W'};
 const int DIRECTIONS[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}}; //{N, E, S, W}
+inline int reversedir(int dir) {return (dir + 2) % 4;}
+
 
 /*
     struct to store current state information
@@ -65,6 +67,7 @@ struct State
     int getDirection(const Location & antLoc,const Location & destLoc,array< int, 2 > & directions);
 
     void updateVisionInformation();
+    size_t manhattanDistance(const Location& loc1, const Location& loc2) const;
 };
 
 ostream& operator<<(ostream& os, const State& state);

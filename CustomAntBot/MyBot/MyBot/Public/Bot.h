@@ -9,6 +9,7 @@
 #include "Bimap.h"
 #include "State.h"
 #include "Location.h"
+//#include "Astar.h"
 
 using namespace std;
 typedef tuple< Location, Location, double > Route;

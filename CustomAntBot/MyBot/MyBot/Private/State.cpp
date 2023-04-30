@@ -143,6 +143,15 @@ void State::updateVisionInformation()
     }
 };
 
+size_t State::manhattanDistance(const Location& loc1, const Location& loc2) const
+{
+    int d1 = abs(loc1.x-loc2.x);
+    int d2 = abs(loc1.y-loc2.y);
+    int dr = min(d1, rows-d1);
+    int dc = min(d2, cols-d2);
+    return dr + dc;
+}
+
 /*
     This is the output function for a state. It will add a char map
     representation of the state to the output stream passed to it.

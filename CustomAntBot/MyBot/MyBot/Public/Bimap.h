@@ -51,7 +51,6 @@ public:
 
 private:
     map<TKey, TValue> forwardMap;
-
     map<TValue, TKey> reverseMap;
 };
 
