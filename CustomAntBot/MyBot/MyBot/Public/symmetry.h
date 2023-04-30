@@ -26,7 +26,7 @@ struct SymmetryFinder {
 	void compute_fingerprints();
 	bool do_find_fingerprint_symmetries(const Location & center);
 	void find_fingerprint_symmetries(const Location & center);
-	void add_candidate_symmetry(const Location & from, const Location & to, uint orientation);
+	void add_candidate_symmetry(const Location & from, const Location & to, size_t orientation);
 	bool check_symmetry(const Symmetry & s);
 	void recheck_symmetries();
 	void add_symmetry(const Symmetry & s);
@@ -34,7 +34,7 @@ struct SymmetryFinder {
 	void broadcast_hill(const Location & pos);
 	void add_possible_enemy_hill(const Location & pos);
 
-	bool have_seen(const Location & center, uint rel) const;
+	bool have_seen(const Location & center, size_t rel) const;
 
 	struct Data;
 

@@ -1,6 +1,6 @@
-#include "tactical_smbase.h"
+#include "..\Public\tactical_smbase.h"
 
-#include "Bot.h"
+#include "..\Public\Bot.h"
 
 using namespace std;
 
@@ -136,16 +136,16 @@ void TacticalSmBase::compute_fooddists()
 	fooddist.fill(MaxFoodDist);
 	bd.queue.clear();
 
-	for (uint idx = 0; idx < state.food.size(); ++idx) {
+	for (size_t idx = 0; idx < state.food.size(); ++idx) {
 		const Location & food = state.food[idx];
 		fooddist[food] = 0;
 		bd.queue.push_back(food);
 	}
 
-	uint queue_head = 0;
+	size_t queue_head = 0;
 	while (queue_head < bd.queue.size()) {
 		Location cur = bd.queue[queue_head++];
-		uint ndist = fooddist[cur] + 1;
+		size_t ndist = fooddist[cur] + 1;
 
 		for (int dir = 0; dir < TDIRECTIONS; ++dir) {
 			Location n = state.getLocation(cur, dir);

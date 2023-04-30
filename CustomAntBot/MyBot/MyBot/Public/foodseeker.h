@@ -14,7 +14,7 @@ struct FoodSeeker {
 	void init();
 	void run();
 
-	uint foodidx_at(const Location & pos);
+	size_t foodidx_at(const Location & pos);
 	void assign_food();
 
 	struct Data;

@@ -13,9 +13,9 @@ struct Offense {
 	void init();
 	void run();
 
-	void update_hill_distance(uint hillidx);
+	void update_hill_distance(size_t hillidx);
 	void update_hills();
-	uint closesthill();
+	size_t closesthill();
 
 	struct Data;
 

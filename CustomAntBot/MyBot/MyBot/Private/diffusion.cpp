@@ -1,8 +1,8 @@
-#include "diffusion.h"
+#include "..\Public\diffusion.h"
 
-#include "Bot.h"
-#include "map.h"
-#include "zoc.h"
+#include "..\Public\Bot.h"
+#include "..\Public\map.h"
+#include "..\Public\zoc.h"
 
 using namespace std;
 
@@ -94,17 +94,17 @@ void Diffusion::diffuse()
 void Diffusion::run()
 {
 	//
-	for (uint antidx = 0; antidx < bot.m_ants.size(); ++antidx) {
+	for (size_t antidx = 0; antidx < bot.m_ants.size(); ++antidx) {
 		Ant & ant = bot.m_ants[antidx];
 
 		d.map[ant.where] += 1.0;
 	}
 
-	for (uint enemyidx = 0; enemyidx < state.enemyAnts.size(); ++enemyidx) {
+	for (size_t enemyidx = 0; enemyidx < state.enemyAnts.size(); ++enemyidx) {
 		d.map[state.enemyAnts[enemyidx]] -= EnemyAntWeight;
 	}
 
-	for (uint enemyhill = 0; enemyhill < state.enemyHills.size(); ++enemyhill) {
+	for (size_t enemyhill = 0; enemyhill < state.enemyHills.size(); ++enemyhill) {
 		d.map[state.enemyHills[enemyhill]] -= EnemyHillWeight;
 	}
 
@@ -128,7 +128,7 @@ void Diffusion::run()
 		diffuse();
 
 	//
-	for (uint antidx = 0; antidx < bot.m_ants.size(); ++antidx) {
+	for (size_t antidx = 0; antidx < bot.m_ants.size(); ++antidx) {
 		Ant & ant = bot.m_ants[antidx];
 
 		if (ant.assigneddirection)

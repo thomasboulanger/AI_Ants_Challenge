@@ -28,19 +28,19 @@ struct TacticalSm : TacticalSmBase {
 
 	bool timeover();
 	void generate_theater(const Location & center);
-	void run_theater(uint theateridx);
-	void push_moves(uint theateridx, uint myidx);
-	void pull_moves(uint theateridx);
-	int pull_enemy_moves(uint theateridx);
+	void run_theater(size_t theateridx);
+	void push_moves(size_t theateridx, size_t myidx);
+	void pull_moves(size_t theateridx);
+	int pull_enemy_moves(size_t theateridx);
 
 	void evaluate_moves(Theater & th, PlayerMove & pm, PlayerMove & enemymove, float & myvalue, float & enemyvalue);
-	void evaluate_new_moves(uint theateridx);
-	bool get_improve_pair(const std::vector<PlayerMove *> & moves, uint & myidx, uint & enemyidx);
-	void improve(uint theateridx, uint myidx, uint enemyidx);
+	void evaluate_new_moves(size_t theateridx);
+	bool get_improve_pair(const std::vector<PlayerMove *> & moves, size_t& myidx, size_t& enemyidx);
+	void improve(size_t theateridx, size_t myidx, size_t enemyidx);
 
-	void choose_strategy(uint theateridx);
-	uint choose_max_min_move(uint theateridx);
-	uint choose_max_avg_move(uint theateridx);
+	void choose_strategy(size_t theateridx);
+	size_t choose_max_min_move(size_t theateridx);
+	size_t choose_max_avg_move(size_t theateridx);
 
 	Data & d;
 };

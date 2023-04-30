@@ -1,4 +1,4 @@
-#ifndef MAP_H
+﻿#ifndef MAP_H
 #define MAP_H
 
 #include "State.h"
@@ -8,12 +8,12 @@ struct Map {
 	typedef T Type;
 	typedef std::vector<Type> Vector;
 
-	Map(uint r = 0, uint c = 0)
+	Map(size_t r = 0, size_t c = 0)
 	{
 		resize(r, c);
 	}
 
-	void resize(uint r, uint c)
+	void resize(size_t r, size_t c)
 	{
 		rows = r;
 		cols = c;
@@ -35,8 +35,8 @@ struct Map {
 		return m_data[pos.row * cols + pos.col];
 	}
 
-	uint rows;
-	uint cols;
+	size_t rows;
+	size_t cols;
 	std::vector<Type> m_data;
 };
 

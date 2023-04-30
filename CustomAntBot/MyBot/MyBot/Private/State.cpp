@@ -1,4 +1,4 @@
-#include "State.h"
+#include "..\Public\State.h"
 #include <stdlib.h>
 
 using namespace std;
@@ -52,7 +52,7 @@ void State::makeMove(const Location &loc, int direction)
     grid[loc.row][loc.col].ant = -1;
 };
 
-uint State::manhattanDistance(const Location& loc1, const Location& loc2) const
+size_t State::manhattanDistance(const Location& loc1, const Location& loc2) const
 {
 	int d1 = abs(loc1.row-loc2.row);
 	int d2 = abs(loc1.col-loc2.col);
@@ -71,7 +71,7 @@ double State::distance(const Location &loc1, const Location &loc2) const
     return sqrt(dr*dr + dc*dc);
 };
 
-uint State::eucliddist2(const Location & loc1, const Location & loc2) const
+size_t State::eucliddist2(const Location & loc1, const Location & loc2) const
 {
 	int d1 = abs(loc1.row-loc2.row);
 	int d2 = abs(loc1.col-loc2.col);

@@ -1,51 +1,35 @@
-/*
- * Copyright 2011 Nicolai Hähnle
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-#include "hilldefense.h"
+#include "..\Public\hilldefense.h"
 
 #include <algorithm>
 #include <cassert>
 #include <limits>
 
-#include "Bot.h"
-#include "zoc.h"
+#include "..\Public\Bot.h"
+#include "..\Public\zoc.h"
 
 using namespace std;
 
-static const uint DefenseEnemyDistance = 20;
-static const uint DefensePanicRadius2 = 110;
-static const uint MinDefenders = 3;
-static const uint EquivalentDangerSlack = 4;
+static const size_t DefenseEnemyDistance = 20;
+static const size_t DefensePanicRadius2 = 110;
+static const size_t MinDefenders = 3;
+static const size_t EquivalentDangerSlack = 4;
 
 struct HillData {
 	struct CandidateDefender {
-		CandidateDefender(uint idx, uint d) : antidx(idx), dist(d) {}
+		CandidateDefender(size_t idx, size_t d) : antidx(idx), dist(d) {}
 
 		bool operator<(const CandidateDefender & o) const {return dist > o.dist;}
 
-		uint antidx;
-		uint dist;
+		size_t antidx;
+		size_t dist;
 	};
 
 	Location pos;
-	Map<uint> dist;
+	Map<size_t> dist;
 	bool needupdate;
-	uint nrdefenders;
+	size_t nrdefenders;
 	vector<CandidateDefender> candidates;
-	vector<uint> defenders;
+	vector<size_t> defenders;
 
 	HillData(State & state, const Location & p) :
 		pos(p),
@@ -58,7 +42,7 @@ struct HillData {
 
 struct HillDefense::Data {
 	vector<HillData *> hills;
-	uint lastupdated;
+	size_t lastupdated;
 	bool hilldestroyed;
 
 	vector<Location> updatequeue;
@@ -94,23 +78,23 @@ void HillDefense::init()
 {
 }
 
-void HillDefense::update_hill_distances(uint hillidx)
+void HillDefense::update_hill_distances(size_t hillidx)
 {
 	HillData * hd = d.hills[hillidx];
 
 	state.bug << "Update distance map for hill " << hillidx << " at " << hd->pos << endl;
 
-	hd->dist.fill(numeric_limits<uint>::max());
+	hd->dist.fill(numeric_limits<size_t>::max());
 
 	d.updatequeue.clear();
 
 	hd->dist[hd->pos] = 0;
 	d.updatequeue.push_back(hd->pos);
 
-	uint queue_head = 0;
+	size_t queue_head = 0;
 	while (queue_head < d.updatequeue.size()) {
 		Location cur = d.updatequeue[queue_head++];
-		uint dist = hd->dist[cur];
+		size_t dist = hd->dist[cur];
 
 		const int * dirperm = getdirperm();
 		for (int predir = 0; predir < TDIRECTIONS; ++predir) {
@@ -133,12 +117,12 @@ void HillDefense::update_hills()
 	d.hilldestroyed = false;
 
 	if (state.newwater) {
-		for (uint hillidx = 0; hillidx < d.hills.size(); ++hillidx)
+		for (size_t hillidx = 0; hillidx < d.hills.size(); ++hillidx)
 			d.hills[hillidx]->needupdate = true;
 	}
 
 	// check if hills are still present
-	for (uint hillidx = 0; hillidx < d.hills.size(); ++hillidx) {
+	for (size_t hillidx = 0; hillidx < d.hills.size(); ++hillidx) {
 		HillData * hd = d.hills[hillidx];
 		Square & sq = state.grid[hd->pos.row][hd->pos.col];
 
@@ -154,10 +138,10 @@ void HillDefense::update_hills()
 	}
 
 	// check if new hills are known now
-	for (uint statehillidx = 0; statehillidx < state.myHills.size(); ++statehillidx) {
+	for (size_t statehillidx = 0; statehillidx < state.myHills.size(); ++statehillidx) {
 		Location pos = state.myHills[statehillidx];
 
-		for (uint hillidx = 0; hillidx < d.hills.size(); ++hillidx) {
+		for (size_t hillidx = 0; hillidx < d.hills.size(); ++hillidx) {
 			if (d.hills[hillidx]->pos == pos)
 				goto known;
 		}
@@ -174,7 +158,7 @@ void HillDefense::update_hills()
 	// update the distance map of one hill
 	if (d.lastupdated >= d.hills.size())
 		d.lastupdated = 0;
-	uint hillidx = d.lastupdated;
+	size_t hillidx = d.lastupdated;
 	do {
 		hillidx++;
 		if (hillidx >= d.hills.size())
@@ -197,7 +181,7 @@ void HillDefense::run()
 	//
 	vector<HillData *> defense;
 
-	for (uint hillidx = 0; hillidx < d.hills.size(); ++hillidx) {
+	for (size_t hillidx = 0; hillidx < d.hills.size(); ++hillidx) {
 		HillData * hd = d.hills[hillidx];
 		if (bot.m_zoc.m_enemy[hd->pos] >= DefenseEnemyDistance)
 			continue;
@@ -206,12 +190,12 @@ void HillDefense::run()
 		hd->candidates.clear();
 		hd->defenders.clear();
 
-		for (uint enemyantidx = 0; enemyantidx < state.enemyAnts.size(); ++enemyantidx) {
+		for (size_t enemyantidx = 0; enemyantidx < state.enemyAnts.size(); ++enemyantidx) {
 			if (state.eucliddist2(state.enemyAnts[enemyantidx], hd->pos) <= DefensePanicRadius2)
 				hd->nrdefenders++;
 		}
 
-		for (uint antidx = 0; antidx < bot.m_ants.size(); ++antidx) {
+		for (size_t antidx = 0; antidx < bot.m_ants.size(); ++antidx) {
 			Ant & ant = bot.m_ants[antidx];
 			hd->candidates.push_back(HillData::CandidateDefender(antidx, hd->dist[ant.where]));
 		}
@@ -228,17 +212,17 @@ void HillDefense::run()
 	while (!defense.empty()) {
 		int besthillidx = -1;
 		int bestantidx = -1;
-		uint bestdistance = numeric_limits<uint>::max();
+		size_t bestdistance = numeric_limits<size_t>::max();
 
-		uint p = getprime();
-		uint ofs = fastrng() % defense.size();
-		for (uint prehillidx = 0; prehillidx < defense.size(); ++prehillidx) {
-			uint hillidx = (p * prehillidx + ofs) % defense.size();
+		size_t p = getprime();
+		size_t ofs = fastrng() % defense.size();
+		for (size_t prehillidx = 0; prehillidx < defense.size(); ++prehillidx) {
+			size_t hillidx = (p * prehillidx + ofs) % defense.size();
 			HillData * hd = defense[hillidx];
 
 			while (!hd->candidates.empty()) {
-				uint antidx = hd->candidates.back().antidx;
-				uint dist = hd->candidates.back().dist;
+				size_t antidx = hd->candidates.back().antidx;
+				size_t dist = hd->candidates.back().dist;
 
 //				state.bug << "  hill at " << hd->pos << " candidate ant " << antidx
 //					<< " at " << bot.m_ants[antidx].where << " dist " << dist << endl;
@@ -273,7 +257,7 @@ void HillDefense::run()
 		claimed[bestantidx] = true;
 
 		//
-		uint hilldanger = bot.m_zoc.m_enemy[hd->pos];
+		size_t hilldanger = bot.m_zoc.m_enemy[hd->pos];
 		Ant & ant = bot.m_ants[bestantidx];
 
 		state.bug << "  assign ant " << bestantidx << " at " << ant.where << " to defend " << hd->pos << endl;
@@ -281,19 +265,19 @@ void HillDefense::run()
 		if (ant.assigneddirection)
 			continue;
 
-		uint equivdanger = bot.m_zoc.m_enemy[ant.where] + hd->dist[ant.where];
+		size_t equivdanger = bot.m_zoc.m_enemy[ant.where] + hd->dist[ant.where];
 		if (equivdanger <= hilldanger + EquivalentDangerSlack) {
 			state.bug << "    equivalent hilldanger " << hilldanger << " is low enough" << endl;
 			continue;
 		}
 
 		int bestdirection = -1;
-		uint bestequivdanger = equivdanger;
+		size_t bestequivdanger = equivdanger;
 		const int * dirperm = getdirperm();
 		for (int predir = 0; predir < TDIRECTIONS; ++predir) {
 			int dir = dirperm[predir];
 			Location n = state.getLocation(ant.where, dir);
-			uint newequivdanger = bot.m_zoc.m_enemy[n] + hd->dist[n];
+			size_t newequivdanger = bot.m_zoc.m_enemy[n] + hd->dist[n];
 			if (newequivdanger < bestequivdanger) {
 				bestequivdanger = newequivdanger;
 				bestdirection = dir;
@@ -301,11 +285,11 @@ void HillDefense::run()
 		}
 
 		if (bestdirection == -1) {
-			uint bestdist = hd->dist[ant.where];
+			size_t bestdist = hd->dist[ant.where];
 			for (int predir = 0; predir < TDIRECTIONS; ++predir) {
 				int dir = dirperm[predir];
 				Location n = state.getLocation(ant.where, dir);
-				uint newdist = hd->dist[n];
+				size_t newdist = hd->dist[n];
 				if (newdist < bestdist) {
 					bestdist = newdist;
 					bestdirection = dir;
@@ -321,12 +305,12 @@ void HillDefense::run()
 	}
 }
 
-uint HillDefense::getnrhills()
+size_t HillDefense::getnrhills()
 {
 	return d.hills.size();
 }
 
-const Location & HillDefense::gethill(uint idx)
+const Location & HillDefense::gethill(size_t idx)
 {
 	//assert(idx < d.hills.size());
 	return d.hills[idx]->pos;

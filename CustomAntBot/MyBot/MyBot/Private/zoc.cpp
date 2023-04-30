@@ -1,7 +1,7 @@
-#include "zoc.h"
+#include "..\Public\zoc.h"
 #include <limits>
 
-#include "State.h"
+#include "..\Public\State.h"
 
 using namespace std;
 
@@ -74,9 +74,9 @@ void Zoc::update()
 		}
 	}
 
-	m_enemy.fill(std::numeric_limits<uint>::max());
+	m_enemy.fill(std::numeric_limits<size_t>::max());
 
-	for (uint idx = 0; idx < d.oldenemies.size(); ++idx) {
+	for (size_t idx = 0; idx < d.oldenemies.size(); ++idx) {
 		cur = d.oldenemies[idx];
 		if (m_enemy[cur] > 0) {
 			m_enemy[cur] = 0;
@@ -94,7 +94,7 @@ void Zoc::update()
 		}
 	}
 
-	for (uint idx = 0; idx < state.enemyAnts.size(); ++idx) {
+	for (size_t idx = 0; idx < state.enemyAnts.size(); ++idx) {
 		cur = state.enemyAnts[idx];
 		if (m_enemy[cur] > 0) {
 			m_enemy[cur] = 0;
@@ -102,7 +102,7 @@ void Zoc::update()
 		}
 	}
 
-	for (uint idx = 0; idx < state.enemyHills.size(); ++idx) {
+	for (size_t idx = 0; idx < state.enemyHills.size(); ++idx) {
 		cur = state.enemyHills[idx];
 		if (m_enemy[cur] > 0) {
 			m_enemy[cur] = 0;
@@ -110,11 +110,11 @@ void Zoc::update()
 		}
 	}
 
-	uint queue_head = 0;
+	size_t queue_head = 0;
 	while (queue_head < d.queue.size()) {
 		cur = d.queue[queue_head++];
 
-		uint dist = m_enemy[cur];
+		size_t dist = m_enemy[cur];
 
 		for (int dir = 0; dir < TDIRECTIONS; ++dir) {
 			Location n = state.getLocation(cur, dir);
@@ -127,11 +127,11 @@ void Zoc::update()
 		}
 	}
 
-	m_me.fill(std::numeric_limits<uint>::max());
+	m_me.fill(std::numeric_limits<size_t>::max());
 	d.queue.clear();
 	queue_head = 0;
 
-	for (uint idx = 0; idx < state.myAnts.size(); ++idx) {
+	for (size_t idx = 0; idx < state.myAnts.size(); ++idx) {
 		cur = state.myAnts[idx];
 		if (m_me[cur] > 0) {
 			m_me[cur] = 0;
@@ -142,7 +142,7 @@ void Zoc::update()
 	while (queue_head < d.queue.size()) {
 		cur = d.queue[queue_head++];
 
-		uint dist = m_me[cur];
+		size_t dist = m_me[cur];
 
 		for (int dir = 0; dir < TDIRECTIONS; ++dir) {
 			Location n = state.getLocation(cur, dir);

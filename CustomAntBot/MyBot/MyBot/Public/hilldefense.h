@@ -15,11 +15,11 @@ struct HillDefense {
 	void run();
 
 	bool hilldestroyed();
-	uint getnrhills();
-	const Location & gethill(uint idx);
+	size_t getnrhills();
+	const Location & gethill(size_t idx);
 
 	void update_hills();
-	void update_hill_distances(uint hillidx);
+	void update_hill_distances(size_t hillidx);
 
 	struct Data;
 

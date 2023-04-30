@@ -14,44 +14,44 @@
  * limitations under the License.
  */
 
-#include "offense.h"
+#include "..\Public\offense.h"
 
 #include <algorithm>
 #include <limits>
 
-#include "Bot.h"
-#include "hilldefense.h"
-#include "symmetry.h"
+#include "..\Public\Bot.h"
+#include "..\Public\hilldefense.h"
+#include "..\Public\symmetry.h"
 
 using namespace std;
 
-static const uint MinUnassignedAnts = 60;
-static const uint AttackAntsMargin = 10;
-static const uint AttackAntNom = 1;
-static const uint AttackAntDenom = 2;
+static const size_t MinUnassignedAnts = 60;
+static const size_t AttackAntsMargin = 10;
+static const size_t AttackAntNom = 1;
+static const size_t AttackAntDenom = 2;
 
-static const uint AttackReconsiderDist = 12;
+static const size_t AttackReconsiderDist = 12;
 
 struct EnemyHillData {
 	Location pos;
-	Map<uint> dist;
-	uint distance_to_own_hill;
+	Map<size_t> dist;
+	size_t distance_to_own_hill;
 	bool needupdate;
 
 	EnemyHillData(State & state, const Location & p) :
 		pos(p),
 		dist(state.rows, state.cols),
-		distance_to_own_hill(numeric_limits<uint>::max()),
+		distance_to_own_hill(numeric_limits<size_t>::max()),
 		needupdate(true)
 	{
-		dist.fill(numeric_limits<uint>::max());
+		dist.fill(numeric_limits<size_t>::max());
 	}
 };
 
 struct Offense::Data {
 	vector<EnemyHillData *> hills;
-	uint lastupdated;
-	uint nrattackants;
+	size_t lastupdated;
+	size_t nrattackants;
 	int attackhill;
 
 	vector<Location> updatequeue;
@@ -86,24 +86,24 @@ void Offense::init()
 
 }
 
-void Offense::update_hill_distance(uint hillidx)
+void Offense::update_hill_distance(size_t hillidx)
 {
 	EnemyHillData * ehd = d.hills[hillidx];
 
 	state.bug << "  update distance map for enemy hill " << hillidx << " at " << ehd->pos << endl;
 	ehd->needupdate = false;
 
-	ehd->dist.fill(numeric_limits<uint>::max());
+	ehd->dist.fill(numeric_limits<size_t>::max());
 	d.updatequeue.clear();
 
-	uint queue_head = 0;
+	size_t queue_head = 0;
 
 	ehd->dist[ehd->pos] = 0;
 	d.updatequeue.push_back(ehd->pos);
 
 	while (queue_head < d.updatequeue.size()) {
 		const Location cur = d.updatequeue[queue_head++];
-		uint dist = ehd->dist[cur] + 1;
+		size_t dist = ehd->dist[cur] + 1;
 
 		for (int dir = 0; dir < TDIRECTIONS; ++dir) {
 			Location n = state.getLocation(cur, dir);
@@ -117,10 +117,10 @@ void Offense::update_hill_distance(uint hillidx)
 		}
 	}
 
-	ehd->distance_to_own_hill = numeric_limits<uint>::max();
+	ehd->distance_to_own_hill = numeric_limits<size_t>::max();
 
-	uint nrmyhills = bot.m_hilldefense.getnrhills();
-	for (uint idx = 0; idx < nrmyhills; ++idx) {
+	size_t nrmyhills = bot.m_hilldefense.getnrhills();
+	for (size_t idx = 0; idx < nrmyhills; ++idx) {
 		const Location & myhillpos = bot.m_hilldefense.gethill(idx);
 		ehd->distance_to_own_hill = min(ehd->distance_to_own_hill, ehd->dist[myhillpos]);
 	}
@@ -130,12 +130,12 @@ void Offense::update_hill_distance(uint hillidx)
 void Offense::update_hills()
 {
 	if (bot.m_symmetry.newwater || bot.m_hilldefense.hilldestroyed()) {
-		for (uint hillidx = 0; hillidx < d.hills.size(); ++hillidx)
+		for (size_t hillidx = 0; hillidx < d.hills.size(); ++hillidx)
 			d.hills[hillidx]->needupdate = true;
 	}
 
 	//
-	for (uint hillidx = 0; hillidx < d.hills.size(); ++hillidx) {
+	for (size_t hillidx = 0; hillidx < d.hills.size(); ++hillidx) {
 		EnemyHillData * ehd = d.hills[hillidx];
 		Square & sq = state.grid[ehd->pos.row][ehd->pos.col];
 
@@ -155,10 +155,10 @@ void Offense::update_hills()
 		}
 	}
 
-	for (uint stidx = 0; stidx < bot.m_symmetry.enemy_hills.size(); ++stidx) {
+	for (size_t stidx = 0; stidx < bot.m_symmetry.enemy_hills.size(); ++stidx) {
 		const Location & pos = bot.m_symmetry.enemy_hills[stidx];
 
-		for (uint hillidx = 0; hillidx < d.hills.size(); ++hillidx) {
+		for (size_t hillidx = 0; hillidx < d.hills.size(); ++hillidx) {
 			if (d.hills[hillidx]->pos == pos)
 				goto found;
 		}
@@ -175,7 +175,7 @@ void Offense::update_hills()
 	//
 	if (d.lastupdated >= d.hills.size())
 		d.lastupdated = 0;
-	uint hillidx = d.lastupdated;
+	size_t hillidx = d.lastupdated;
 	do {
 		hillidx++;
 		if (hillidx >= d.hills.size())
@@ -189,12 +189,13 @@ void Offense::update_hills()
 	} while (hillidx != d.lastupdated);
 }
 
-uint Offense::closesthill()
+size_t Offense::closesthill()
 {
-	uint closest = 0;
-	uint bestdist = numeric_limits<uint>::max();
+	size_t closest = 0;
+	size_t bestdist = numeric_limits<size_t>::max()
+	;
 
-	for (uint idx = 0; idx < d.hills.size(); ++idx) {
+	for (size_t idx = 0; idx < d.hills.size(); ++idx) {
 		if (d.hills[idx]->distance_to_own_hill <= bestdist) {
 			bestdist = d.hills[idx]->distance_to_own_hill;
 			closest = idx;
@@ -205,12 +206,12 @@ uint Offense::closesthill()
 }
 
 struct AttackCandidate {
-	AttackCandidate(uint idx) : antidx(idx), dist(0) {}
+	AttackCandidate(size_t idx) : antidx(idx), dist(0) {}
 
 	bool operator<(const AttackCandidate & o) const {return dist < o.dist;}
 
-	uint antidx;
-	uint dist;
+	size_t antidx;
+	size_t dist;
 };
 
 void Offense::run()
@@ -225,14 +226,14 @@ void Offense::run()
 	//
 	vector<AttackCandidate> unassignedants;
 
-	for (uint antidx = 0; antidx < bot.m_ants.size(); ++antidx) {
+	for (size_t antidx = 0; antidx < bot.m_ants.size(); ++antidx) {
 		if (!bot.m_ants[antidx].assigneddirection)
 			unassignedants.push_back(AttackCandidate(antidx));
 	}
 
 	//
-	uint minants = 0;
-	uint maxants = 0;
+	size_t minants = 0;
+	size_t maxants = 0;
 
 	if (unassignedants.size() >= MinUnassignedAnts)
 		minants = (unassignedants.size() * AttackAntNom) / AttackAntDenom;
@@ -240,7 +241,7 @@ void Offense::run()
 		maxants = ((unassignedants.size() + AttackAntsMargin) * AttackAntNom) / AttackAntDenom;
 
 	d.nrattackants = min(maxants, max(minants, d.nrattackants));
-	d.nrattackants = min(d.nrattackants, (uint)unassignedants.size());
+	d.nrattackants = min(d.nrattackants, (size_t)unassignedants.size());
 
 	if (!d.nrattackants) {
 		d.attackhill = -1;
@@ -255,7 +256,7 @@ void Offense::run()
 
 	//
 	EnemyHillData * ehd = d.hills[d.attackhill];
-	for (uint idx = 0; idx < unassignedants.size(); ++idx) {
+	for (size_t idx = 0; idx < unassignedants.size(); ++idx) {
 		Ant & ant = bot.m_ants[unassignedants[idx].antidx];
 		unassignedants[idx].dist = ehd->dist[ant.where];
 	}
@@ -263,7 +264,7 @@ void Offense::run()
 	sort(unassignedants.begin(), unassignedants.end());
 
 	if (unassignedants.front().dist >= AttackReconsiderDist) {
-		uint closest = closesthill();
+		size_t closest = closesthill();
 		if ((int)closest != d.attackhill) {
 			state.bug << "  closest hill changed, rerouting attack" << endl;
 			d.attackhill = closest;
@@ -273,16 +274,16 @@ void Offense::run()
 
 	//
 	state.bug << "  attacking " << ehd->pos << " with " << d.nrattackants << " ants" << endl;
-	for (uint idx = 0; idx < d.nrattackants; ++idx) {
+	for (size_t idx = 0; idx < d.nrattackants; ++idx) {
 		Ant & ant = bot.m_ants[unassignedants[idx].antidx];
 
 		int bestdir = -1;
-		uint bestdist = ehd->dist[ant.where];
+		size_t bestdist = ehd->dist[ant.where];
 		const int * dirperm = getdirperm();
 		for (int predir = 0; predir < TDIRECTIONS; ++predir) {
 			int dir = dirperm[predir];
 			Location n = state.getLocation(ant.where, dir);
-			uint dist = ehd->dist[n];
+			size_t dist = ehd->dist[n];
 
 			if (dist < bestdist) {
 				bestdir = dir;

@@ -27,7 +27,8 @@
 struct Bot;
 struct Submap;
 
-static const uint MaxFoodDist = 16;
+static const size_t MaxFoodDist = 16;
+
 
 struct TacticalSmBase : Module {
 	TacticalSmBase(Bot & b);
@@ -54,7 +55,7 @@ struct TacticalSmBase : Module {
 	float ValueEnemyDist;
 	float ValueFoodDist;
 
-	uint MinAggressionAnts;
+	size_t MinAggressionAnts;
 	float AggressionThresholdShift;
 	float AggressionScale;
 };
@@ -67,7 +68,7 @@ struct BaseSubmap {
 	T map[Size * Size];
 
 	void fill(T c) {
-		for (uint idx = 0; idx < Size * Size; ++idx)
+		for (size_t idx = 0; idx < Size * Size; ++idx)
 			map[idx] = c;
 	}
 	static bool inside(const Location & pos) {
@@ -95,17 +96,17 @@ struct BaseSubmap {
 		}
 		return inside(out);
 	}
-	static uint manhattandist(const Location & a, const Location & b) {
+	static size_t manhattandist(const Location & a, const Location & b) {
 		return abs(a.row - b.row) + abs(a.col - b.col);
 	}
 
-	static uint eucliddist2(const Location & a, const Location & b) {
+	static size_t eucliddist2(const Location & a, const Location & b) {
 		int dr = a.row - b.row;
 		int dc = a.col - b.col;
 		return (dr * dr) + (dc * dc);
 	}
 
-	static uint infinitydist(const Location & a, const Location & b) {
+	static size_t infinitydist(const Location & a, const Location & b) {
 		int dr = a.row - b.row;
 		int dc = a.col - b.col;
 		return std::max(abs(dr), abs(dc));
@@ -122,7 +123,7 @@ struct Submap : BaseSubmap<uint8_t> {
 
 	void flipsides()
 	{
-		for (uint idx = 0; idx < Size * Size; ++idx) {
+		for (size_t idx = 0; idx < Size * Size; ++idx) {
 			uint8_t & field = map[idx];
 
 			if ((field ^ (field >> 1)) & 1)
@@ -181,8 +182,8 @@ struct PlayerMove {
 	};
 
 	std::vector<AntMove> antmoves;
-	uint hash;
-	uint nrcollided;
+	size_t hash;
+	size_t nrcollided;
 
 	static const uint8_t AntsMask = 0xe0;
 	static const uint8_t AntsShift = 5;
@@ -225,18 +226,18 @@ struct PlayerMove {
 
 	void computehash() {
 		hash = 0;
-		for (uint idx = 0; idx < Submap::Size * Submap::Size; ++idx)
+		for (size_t idx = 0; idx < Submap::Size * Submap::Size; ++idx)
 			hash = (hash * 312007) + map.map[idx];
 	}
 
-	void ant_mark(uint idx) {
+	void ant_mark(size_t idx) {
 		// assume: direction and pos already set
 		AntMove & am = antmoves[idx];
 
 		if (!map.inside(am.pos))
 			return;
 
-		uint prevnrants = map[am.pos] >> AntsShift;
+		size_t prevnrants = map[am.pos] >> AntsShift;
 
 		map[am.pos] += 1 << AntsShift;
 		if (prevnrants == 0) {
@@ -245,7 +246,7 @@ struct PlayerMove {
 			am.collider = 0;
 		} else if (prevnrants == 1) {
 			add_enemy_kernel(map, am.pos, -1);
-			for (uint other = 0; other < antmoves.size(); ++other) {
+			for (size_t other = 0; other < antmoves.size(); ++other) {
 				AntMove & otherm = antmoves[other];
 				if (other == idx || am.pos != otherm.pos)
 					continue;
@@ -261,21 +262,21 @@ struct PlayerMove {
 		}
 	}
 
-	void ant_unmark(uint idx) {
+	void ant_unmark(size_t idx) {
 		// assume: direction and pos still set
 		AntMove & am = antmoves[idx];
 
 		if (!map.inside(am.pos))
 			return;
 
-		uint prevnrants = map[am.pos] >> AntsShift;
+		size_t prevnrants = map[am.pos] >> AntsShift;
 		//assert(prevnrants >= 1);
 
 		map[am.pos] -= 1 << AntsShift;
 		if (prevnrants == 1) {
 			add_enemy_kernel(map, am.pos, -1);
 		} else if (prevnrants == 2) {
-			for (uint other = 0; other < antmoves.size(); ++other) {
+			for (size_t other = 0; other < antmoves.size(); ++other) {
 				AntMove & otherm = antmoves[other];
 				if (other == idx || am.pos != otherm.pos)
 					continue;
@@ -288,7 +289,7 @@ struct PlayerMove {
 			}
 		} else {
 			if (!am.collider) {
-				for (uint other = 0; other < antmoves.size(); ++other) {
+				for (size_t other = 0; other < antmoves.size(); ++other) {
 					AntMove & otherm = antmoves[other];
 					if (other == idx || am.pos != otherm.pos)
 						continue;
@@ -303,7 +304,7 @@ struct PlayerMove {
 
 	void reset_killed()
 	{
-		for (uint idx = 0; idx < antmoves.size(); ++idx) {
+		for (size_t idx = 0; idx < antmoves.size(); ++idx) {
 			PlayerMove::AntMove & am = antmoves[idx];
 			am.sentoffense = 0;
 			am.killed = 0;

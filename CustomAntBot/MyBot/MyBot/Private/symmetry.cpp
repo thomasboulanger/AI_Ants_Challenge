@@ -1,29 +1,13 @@
-/*
- * Copyright 2011 Nicolai Hähnle
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-#include "symmetry.h"
+#include "..\Public\symmetry.h"
 
 #include <map>
 #include <set>
 
-#include "Bot.h"
+#include "..\Public\Bot.h"
 
 using namespace std;
 
-static const uint ORIENTATIONS = 8;
+static const size_t ORIENTATIONS = 8;
 static const int ORIENTATIONDIRPERMS[8][4] = {
 	{ 0, 1, 2, 3 }, // ORIENTATIONDIRPERMS[orientation][dir] = orientation . dir
 	{ 2, 1, 0, 3 },
@@ -35,7 +19,7 @@ static const int ORIENTATIONDIRPERMS[8][4] = {
 	{ 1, 0, 3, 2 }
 };
 
-Location orient_offset(const Location & ofs, uint orientation) {
+Location orient_offset(const Location & ofs, size_t orientation) {
 	switch (orientation) {
 	case 0: return ofs;
 	case 1: return Location(-ofs.row, ofs.col);
@@ -52,9 +36,9 @@ Location orient_offset(const Location & ofs, uint orientation) {
 /**
  * Return the orientation f . g, where . is function composition.
  */
-uint compose_orientations(uint f, uint g)
+size_t compose_orientations(size_t f, size_t g)
 {
-	uint out = g;
+	size_t out = g;
 	if (f & 4) {
 		out = ((out & 1) << 1) | ((out & 2) >> 1) | ((out & 4) ^ 4);
 	}
@@ -68,9 +52,9 @@ uint compose_orientations(uint f, uint g)
  */
 struct Symmetry {
 	Location origin;
-	uint orientation;
+	size_t orientation;
 
-	Symmetry(const Location & origin_, uint orientation_) :
+	Symmetry(const Location & origin_, size_t orientation_) :
 		origin(origin_),
 		orientation(orientation_)
 	{
@@ -81,11 +65,11 @@ struct Symmetry {
 	 *
 	 * Must satisfy @code to = origin + orient_offset(from, orientation) @endcode
 	 */
-	Symmetry(const State & state, const Location & from, const Location & to, uint orientation_) :
+	Symmetry(const State & state, const Location & from, const Location & to, size_t orientation_) :
 		orientation(orientation_)
 	{
 		Location oriented = orient_offset(from, orientation);
-		uint shift = state.rows * state.cols;
+		size_t shift = state.rows * state.cols;
 		origin.row = (to.row - oriented.row + shift) % state.rows;
 		origin.col = (to.col - oriented.col + shift) % state.cols;
 	}
@@ -99,7 +83,7 @@ struct Symmetry {
 
 	Location apply(const State & state, const Location & loc) const {
 		Location oriented = orient_offset(loc, orientation);
-		uint shift = state.rows * state.cols;
+		size_t shift = state.rows * state.cols;
 		return Location
 			((origin.row + oriented.row + shift) % state.rows,
 			 (origin.col + oriented.col + shift) % state.cols);
@@ -209,12 +193,12 @@ void SymmetryFinder::add_possible_enemy_hill(const Location & pos)
 	if (map[pos] & MapKnownNoHill)
 		return;
 
-	for (uint idx = 0; idx < d.all_my_hills.size(); ++idx) {
+	for (size_t idx = 0; idx < d.all_my_hills.size(); ++idx) {
 		if (d.all_my_hills[idx] == pos)
 			return;
 	}
 
-	for (uint idx = 0; idx < d.all_enemy_hills.size(); ++idx) {
+	for (size_t idx = 0; idx < d.all_enemy_hills.size(); ++idx) {
 		if (d.all_enemy_hills[idx] == pos)
 			return;
 	}
@@ -300,10 +284,10 @@ void SymmetryFinder::update_map()
 
 	// broadcast newly found hills
 	bool newhills = false;
-	for (uint idx = 0; idx < state.myHills.size(); ++idx) {
+	for (size_t idx = 0; idx < state.myHills.size(); ++idx) {
 		const Location & pos = state.myHills[idx];
 
-		for (uint j = 0; j < d.all_my_hills.size(); ++j) {
+		for (size_t j = 0; j < d.all_my_hills.size(); ++j) {
 			if (d.all_my_hills[j] == pos)
 				goto foundmine;
 		}
@@ -314,10 +298,10 @@ void SymmetryFinder::update_map()
 	}
 
 	// broadcast enemy hills
-	for (uint idx = 0; idx < state.enemyHills.size(); ++idx) {
+	for (size_t idx = 0; idx < state.enemyHills.size(); ++idx) {
 		const Location & pos = state.enemyHills[idx];
 
-		for (uint j = 0; j < d.all_enemy_hills.size(); ++j) {
+		for (size_t j = 0; j < d.all_enemy_hills.size(); ++j) {
 			if (d.all_enemy_hills[j] == pos)
 				goto foundenemy;
 		}
@@ -332,12 +316,13 @@ void SymmetryFinder::update_map()
 
 	// do this afterwards, in case a symmetry maps own hills onto each other
 	if (newhills) {
-		for (uint idx = 0; idx < state.myHills.size(); ++idx)
+		for (size_t idx = 0; idx < state.myHills.size(); ++idx)
 			broadcast_hill(state.myHills[idx]);
-		for (uint idx = 0; idx < state.enemyHills.size(); ++idx)
+		for (size_t idx = 0; idx < state.enemyHills.size(); ++idx)
 			broadcast_hill(state.enemyHills[idx]);
 	}
 }
+
 
 void SymmetryFinder::compute_fingerprints()
 {
@@ -355,38 +340,38 @@ void SymmetryFinder::compute_fingerprints()
 			const uint32_t prime = 312101;
 			bool centerwater = state.grid[center.row][center.col].isWater;
 
-			for (uint dist = 1; dist <= 3; ++dist) {
-				uint count1 = 0;
-				uint count2 = 0;
-				static const uint orientmap[4] = { 0, 2, 4, 5 };
-				for (uint orient = 0; orient < 4; ++orient) {
+			for (size_t dist = 1; dist <= 3; ++dist) {
+				size_t count1 = 0;
+				size_t count2 = 0;
+				static const size_t orientmap[4] = { 0, 2, 4, 5 };
+				for (size_t orient = 0; orient < 4; ++orient) {
 					Location n(state.addLocations(center, orient_offset(Location(dist, dist), orient)));
-					count1 += uint(state.grid[n.row][n.col].isWater != centerwater);
+					count1 += size_t(state.grid[n.row][n.col].isWater != centerwater);
 
 					n = state.addLocations(center, orient_offset(Location(0, dist), orientmap[orient]));
-					count2 += uint(state.grid[n.row][n.col].isWater != centerwater);
+					count2 += size_t(state.grid[n.row][n.col].isWater != centerwater);
 				}
 
 				fingerprint = (fingerprint * prime) + count1;
 				fingerprint = (fingerprint * prime) + count2;
 
-				for (uint k = 1; k < dist; ++k) {
+				for (size_t k = 1; k < dist; ++k) {
 					Location n[8];
-					uint counts[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-					for (uint orient = 0; orient < ORIENTATIONS; ++orient)
+					size_t counts[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+					for (size_t orient = 0; orient < ORIENTATIONS; ++orient)
 						n[orient] = state.addLocations(center, orient_offset(Location(dist, k), orient));
 
-					for (uint orient = 0; orient < ORIENTATIONS; ++orient) {
+					for (size_t orient = 0; orient < ORIENTATIONS; ++orient) {
 						bool nwater = state.grid[n[orient].row][n[orient].col].isWater;
-						counts[0] += uint(nwater != centerwater);
+						counts[0] += size_t(nwater != centerwater);
 
-						for (uint rel = 1; rel < ORIENTATIONS; ++rel) {
-							uint comp = compose_orientations(orient, rel);
-							counts[rel] += uint(nwater != state.grid[n[comp].row][n[comp].col].isWater);
+						for (size_t rel = 1; rel < ORIENTATIONS; ++rel) {
+							size_t comp = compose_orientations(orient, rel);
+							counts[rel] += size_t(nwater != state.grid[n[comp].row][n[comp].col].isWater);
 						}
 					}
 
-					for (uint orient = 0; orient < ORIENTATIONS; ++orient)
+					for (size_t orient = 0; orient < ORIENTATIONS; ++orient)
 						fingerprint = (fingerprint * prime) + counts[orient];
 				}
 			}
@@ -421,11 +406,11 @@ void SymmetryFinder::add_symmetry(const Symmetry & s)
 		}
 	}
 
-	for (uint idx = 0; idx < d.all_my_hills.size(); ++idx) {
+	for (size_t idx = 0; idx < d.all_my_hills.size(); ++idx) {
 		Location img = s.apply(state, d.all_my_hills[idx]);
 		add_possible_enemy_hill(img);
 	}
-	for (uint idx = 0; idx < d.all_enemy_hills.size(); ++idx) {
+	for (size_t idx = 0; idx < d.all_enemy_hills.size(); ++idx) {
 		Location img = s.apply(state, d.all_enemy_hills[idx]);
 		add_possible_enemy_hill(img);
 	}
@@ -453,7 +438,7 @@ bool SymmetryFinder::check_symmetry(const Symmetry & s)
 	return true;
 }
 
-void SymmetryFinder::add_candidate_symmetry(const Location & from, const Location & to, uint orientation)
+void SymmetryFinder::add_candidate_symmetry(const Location & from, const Location & to, size_t orientation)
 {
 	Symmetry s(state, from, to, orientation);
 
@@ -463,7 +448,7 @@ void SymmetryFinder::add_candidate_symmetry(const Location & from, const Locatio
 	state.bug << "Check candidate symmetry from " << from << " to " << to << " orientation " << orientation << ": " << s << endl;
 
 	Symmetry f(s);
-	uint power = 1;
+	size_t power = 1;
 
 	while (!f.isidentity()) {
 		state.bug << "  check " << f << endl;
@@ -520,7 +505,7 @@ bool SymmetryFinder::do_find_fingerprint_symmetries(const Location & center)
 		if (it->second == center)
 			continue;
 
-		uint otherprints[4];
+		size_t otherprints[4];
 
 		for (int dir = 0; dir < TDIRECTIONS; ++dir) {
 			Location n(state.addLocations(it->second, Location(3 * DIRECTIONS[dir][0], 3 * DIRECTIONS[dir][1])));
@@ -529,7 +514,7 @@ bool SymmetryFinder::do_find_fingerprint_symmetries(const Location & center)
 			otherprints[dir] = d.fingerprints[n];
 		}
 
-		for (uint orientation = 0; orientation < ORIENTATIONS; ++orientation) {
+		for (size_t orientation = 0; orientation < ORIENTATIONS; ++orientation) {
 			for (int dir = 0; dir < TDIRECTIONS; ++dir) {
 				if (otherprints[ORIENTATIONDIRPERMS[orientation][dir]] != fingerprints[dir])
 					goto skip;
@@ -572,7 +557,7 @@ void SymmetryFinder::check_destroyed_hills()
 		}
 	}
 
-	for (uint idx = 0; idx < enemy_hills.size(); ++idx) {
+	for (size_t idx = 0; idx < enemy_hills.size(); ++idx) {
 		if (map[enemy_hills[idx]] & MapKnownNoHill) {
 			enemy_hills[idx] = enemy_hills.back();
 			enemy_hills.pop_back();
@@ -582,7 +567,7 @@ void SymmetryFinder::check_destroyed_hills()
 	}
 }
 
-bool SymmetryFinder::have_seen(const Location & center, uint rel) const
+bool SymmetryFinder::have_seen(const Location & center, size_t rel) const
 {
 	Location ofs;
 	for (ofs.row = -(int)rel; ofs.row <= (int)rel; ++ofs.row) {

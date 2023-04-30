@@ -281,10 +281,10 @@ struct State
 
 	void makeMove(const Location &loc, int direction);
 
-	uint manhattanDistance(const Location & loc1, const Location & loc2) const;
+	size_t manhattanDistance(const Location & loc1, const Location & loc2) const;
 	double distance(const Location &loc1, const Location &loc2) const;
 	Location getLocation(const Location &startLoc, int direction) const;
-	uint eucliddist2(const Location & loc1, const Location & loc2) const;
+	size_t eucliddist2(const Location & loc1, const Location & loc2) const;
 	Location addLocations(const Location & a, const Location & b) const {
 		return Location((a.row + b.row + rows) % rows, (a.col + b.col + cols) % cols);
 	}

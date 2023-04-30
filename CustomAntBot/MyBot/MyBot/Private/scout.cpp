@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-#include "scout.h"
+#include "..\Public\scout.h"
 
 #include <algorithm>
 #include <list>
 #include <queue>
 
-#include "Bot.h"
-#include "map.h"
-#include "zoc.h"
+#include "..\Public\Bot.h"
+#include "..\Public\map.h"
+#include "..\Public\zoc.h"
 #include <limits>
 
 using namespace std;
 
-static const uint ScoutFracNom = 1;
-static const uint ScoutFracDenom = 50;
-static const uint ScoutCountMargin = 10;
+static const size_t ScoutFracNom = 1;
+static const size_t ScoutFracDenom = 50;
+static const size_t ScoutCountMargin = 10;
 
 static const int ScoutMinAge = 50;
 
 struct FoundInvisbleArea {
 	vector<Location> where;
-	uint oldest;
+	size_t oldest;
 	bool used;
 };
 
 struct Scout::Data {
-	uint nrscouts;
+	size_t nrscouts;
 	Map<int> scoutmap;
 
 	struct LocationHeight {
@@ -77,8 +77,8 @@ void Scout::init()
 
 void Scout::update_nrscouts()
 {
-	uint upper = 1 + (bot.m_ants.size() * ScoutFracNom) / ScoutFracDenom;
-	uint lower;
+	size_t upper = 1 + (bot.m_ants.size() * ScoutFracNom) / ScoutFracDenom;
+	size_t lower;
 	if (bot.m_ants.size() < ScoutCountMargin)
 		lower = 0;
 	else
@@ -118,7 +118,7 @@ struct ShowScoutMap {
 						else
 							out << '@';
 					} else {
-						uint increases = 0;
+						size_t increases = 0;
 						for (int dir = 0; dir < TDIRECTIONS; ++dir) {
 							Location n = state.getLocation(cur, dir);
 							if (d.scoutmap[n] > d.scoutmap[cur])
@@ -199,7 +199,7 @@ void Scout::recompute_maps()
 struct SortAntByHeight {
 	SortAntByHeight(Bot & b, Map<int> & m) : bot(b), map(m) {}
 
-	bool operator()(uint a, uint b) const {
+	bool operator()(size_t a, size_t b) const {
 		return map[bot.m_ants[a].where] > map[bot.m_ants[b].where];
 	}
 
@@ -217,14 +217,14 @@ void Scout::run()
 
 	recompute_maps();
 
-	vector<uint> ants;
+	vector<size_t> ants;
 	ants.reserve(bot.m_ants.size());
-	for (uint idx = 0; idx < bot.m_ants.size(); ++idx)
+	for (size_t idx = 0; idx < bot.m_ants.size(); ++idx)
 		ants.push_back(idx);
 
 	sort(ants.begin(), ants.end(), SortAntByHeight(bot, d.scoutmap));
 
-	for (uint i = 0; i < d.nrscouts; ++i) {
+	for (size_t i = 0; i < d.nrscouts; ++i) {
 		Ant & ant = bot.m_ants[ants[i]];
 		if (ant.assigneddirection)
 			continue;
