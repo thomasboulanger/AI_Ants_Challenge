@@ -1,4 +1,20 @@
-﻿#ifndef ASTAR_H
+/*
+ * Copyright 2011 Nicolai Hähnle
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef ASTAR_H
 #define ASTAR_H
 
 #include <cassert>
@@ -66,7 +82,7 @@ protected:
 	};
 
 	State & m_state;
-	map<Field> m_map;
+	Map<Field> m_map;
 	std::priority_queue<Location, std::vector<QueuePair>, MyCompare> m_queue;
 };
 
@@ -89,7 +105,7 @@ struct StepEvalDefault {
 	StepEvalDefault(const State & state) : m_state(state) {}
 
 	bool operator()(const Location & from, const Location & to, int direction, int32_t * pstepcost) const {
-		if (m_state.grid[to.x][to.y].isWater)
+		if (m_state.grid[to.row][to.col].isWater)
 			return false;
 
 		*pstepcost = 1;
@@ -142,7 +158,7 @@ struct AStar : BaseAStar {
 			int dir = dirperm[predir];
 			Location neighbour = m_state.getLocation(pos, dir);
 			int32_t stepcost;
-		
+
 			Field & fn = m_map[neighbour];
 			if (fn.state == Field::BLACK || fn.state == Field::GREY) {
 				if (m_stepeval(pos, neighbour, dir, &stepcost))

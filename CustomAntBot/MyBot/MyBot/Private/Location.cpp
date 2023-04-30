@@ -4,6 +4,6 @@ using namespace std;
 
 ostream& operator <<(ostream& os, const Location& loc)
 {
-    os << "(" << loc.x << ", " << loc.y << ")";
+    os << "(" << loc.row << ", " << loc.col << ")";
     return os;
 }

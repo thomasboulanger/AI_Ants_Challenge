@@ -3,40 +3,32 @@
 
 #include <ostream>
 
-using namespace std;
-
-//struct for representing locations in the grid.
+/*
+    struct for representing locations in the grid.
+*/
 struct Location
 {
-    int x, y;
+	int row, col;
 
-    Location()
-    {
-        x = y = 0;
-    }
+	Location()
+	{
+		row = col = 0;
+	}
 
-    Location(int r, int c)
-    {
-        x = r;
-        y = c;
-    }
+	Location(int r, int c)
+	{
+		row = r;
+		col = c;
+	}
 
-    bool operator==(const Location& other) const
-    {
-        return (x == other.x && y == other.y);
-    }
-
-    bool operator<(const Location& other) const
-    {
-        if (x < other.x)
-            return true;
-        if (x == other.x)
-            return y < other.y;
-
-        return false;
-    }
+	bool operator==(const Location & o) const {
+		return row == o.row && col == o.col;
+	}
+	bool operator!=(const Location & o) const {return !(*this == o);}
 };
 
-ostream& operator<<(ostream& os, const Location& loc);
+inline std::ostream & operator<<(std::ostream & out, const Location & loc) {
+	return out << loc.row << ", " << loc.col;
+}
 
 #endif //LOCATION_H_
