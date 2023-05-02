@@ -21,16 +21,19 @@ struct Location
         y = c;
     }
 
+    //operator ==
     bool operator==(const Location& other) const
     {
         return (x == other.x && y == other.y);
     }
 
+    //operator !=
     bool operator!=(const Location& other) const
     {
         return (x != other.x || y != other.y);
     }
-    
+
+    //operator < (and > btw)
     bool operator<(const Location& other) const
     {
         if (x == other.x)

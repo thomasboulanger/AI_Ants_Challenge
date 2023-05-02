@@ -8,13 +8,9 @@ Astar::Astar(State* state)
     _state = state;
 }
 
+//get the heuristic value
 int Astar::heuristic(Location u, Location v)
 {
-    // heuristic function: Euclidean distance between u and v
-    // int dx = u.x - v.x;
-    // int dy = u.y - v.y;
-    // return sqrt(dx * dx + dy * dy);
-
     //manhattan distance
     int d1 = abs(u.x - v.x),
         d2 = abs(u.y - v.y),
@@ -23,6 +19,7 @@ int Astar::heuristic(Location u, Location v)
     return dx + dy;
 }
 
+//A* function that return the direction from the current position to move to the end position
 int Astar::astar(Location start, Location end)
 {
     // _state->bug << "AStar " << start.x << ":" << start.y << " -> " << end.x << ":" << end.y << endl;
@@ -37,7 +34,8 @@ int Astar::astar(Location start, Location end)
     };
 
     priority_queue<Location, vector<Location>, decltype(sortFunction)> priorityQ(sortFunction);
-    
+
+    //initialize the first value (start position)
     priorityQ.push(start);
     scoreByDistance[start] = 0;
     scoreByHeuristic[start] = scoreByDistance[start] + heuristic(start, end);
@@ -68,11 +66,13 @@ int Astar::astar(Location start, Location end)
             return (currentDir + TDIRECTIONS / 2) % TDIRECTIONS;
         }
 
+        //increment the cost (each cells count as 1)
         int nextPosScoreByDistance = scoreByDistance[current] + 1;
 
         if (nextPosScoreByDistance > 16)
             return -1;
-        
+
+        //iterate on each direction to add the bests value to the priority queue
         for (int dir = 0; dir < TDIRECTIONS; dir++)
         {
             Location nextPos = _state->getLocation(current, dir);

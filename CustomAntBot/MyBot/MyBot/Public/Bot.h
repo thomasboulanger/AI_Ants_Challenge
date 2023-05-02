@@ -29,9 +29,9 @@ struct Bot
     void playGame();    //plays a single game of Ants
     void makeMoves();   //makes moves for a single turn
 
-    bool doMoveDirection(const Location & antPos, int direction);
-    bool doMoveLocation(const Location & antPos, const Location & destinationPos);
-    void doTurn();
+    bool doMoveDirection(const Location & antPos, int direction);   //move from an initial position with a direction
+    bool doMoveLocation(const Location & antPos, const Location & destinationPos); //move an ant from an initial position to another position
+    void doTurn();  //all the logic that drive some pixel to pretend to be other things, like ants ? 
     static bool cmpRoutes(const Route & lhs, const Route & rhs);
     
     void endTurn();     //indicates to the engine that it has made its moves
