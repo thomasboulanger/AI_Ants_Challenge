@@ -2,8 +2,9 @@
 
 //constructor
 Bot::Bot()
+    : astarObj(&state)
 {
-};
+}
 
 //plays a single game of Ants.
 void Bot::playGame()
@@ -12,7 +13,7 @@ void Bot::playGame()
     cin >> state;
     state.setup();
     endTurn();
-
+    
     // All the locations are unseen at the beginning
     for (int x = 0; x < state.rows; ++x)
         for (int y = 0; y < state.cols; ++y)
@@ -26,7 +27,7 @@ void Bot::playGame()
         doTurn();
         endTurn();
     }
-};
+}
 
 bool Bot::doMoveDirection(const Location& antPos, int dir)
 {
@@ -39,7 +40,7 @@ bool Bot::doMoveDirection(const Location& antPos, int dir)
     }
     else
         return false;
-};
+}
 
 bool Bot::doMoveLocation(const Location& antPos, const Location& destinationPos)
 {
@@ -54,7 +55,7 @@ bool Bot::doMoveLocation(const Location& antPos, const Location& destinationPos)
         }
 
     return false;
-};
+}
 
 //game logic for each ant on each turn
 void Bot::doTurn()
@@ -95,20 +96,41 @@ void Bot::doTurn()
 #endif
 
     vector<Route>::iterator routeIterator;
+    state.bug << "COMPUTE ASTAR " << state.timer.getTime() << endl;
     for (routeIterator = foodRoutes.begin(); routeIterator < foodRoutes.end(); ++routeIterator)
     {
         if (!targets.containsKey(get<1>(*routeIterator))) // food already queried?
         {
             if (!targets.containsValue(get<0>(*routeIterator))) // ant already doing something?
-                if (doMoveLocation(get<0>(*routeIterator), get<1>(*routeIterator)))
+            {
+                if (state.timer.getTime() > 500)
+                    break;
+                
+                // state.bug << "COMPUTE ASTAR" << endl;
+                int shortestPathDirection = astarObj.astar(get<0>(*routeIterator), get<1>(*routeIterator));
+
+                if (shortestPathDirection == -1)
                 {
-#ifdef DEBUG
-                    state.bug << ">> Added move from " << get<0>( *routeIt ) << " to " 
-                                                       << get<1>( *routeIt ) << endl;
-#endif
+                   // state.bug << "No path found" << endl;
                 }
+                else if (shortestPathDirection == -2)
+                {
+                    // state.bug << "A Star No Move" << endl;
+                }
+                else doMoveDirection(get<0>(*routeIterator), shortestPathDirection);
+
+#ifdef DEBUG
+                /*
+                state.bug << ">> Added move from " << get<0>( *routeIterator ) << " to " 
+                                                   << get<1>( *routeIterator ) << endl;
+                */
+#endif
+            }
         }
     }
+
+    state.bug << "COMPUTE ASTAR END " << state.timer.getTime() << endl;
+
     // Remove the locations that are visible
     state.bug << "there are " << unseen.size() << " unseen locations here" << endl;
 
@@ -127,6 +149,8 @@ void Bot::doTurn()
     vector<Route> unseenRoutes(unseen.size(), make_tuple(Location(), Location(), 0));
     for (size_t antIdx = 0; antIdx < state.myAnts.size(); ++antIdx)
     {
+        if (state.timer.getTime() > 700)
+            break;
         // Check that we are not already moving the ant
         movingOut = false;
         for (ordersIterator = orders.begin(); ordersIterator != orders.end(); ++ordersIterator)
@@ -152,18 +176,20 @@ void Bot::doTurn()
                 if (doMoveLocation(get<0>(*routeIterator), get<1>(*routeIterator))) break;
         }
     }
-    
+
     // Move out from our hills
     for (hillIterator = state.myHills.begin(); hillIterator != state.myHills.end(); ++hillIterator)
     {
         vector<Location>::iterator it = find(state.myAnts.begin(), state.myAnts.end(), *hillIterator);
         if (it != state.myAnts.end())
         {
+            if (state.timer.getTime() > 900)
+                break;
             // Check that we are not already moving the ant
             movingOut = false;
             for (ordersIterator = orders.begin(); ordersIterator != orders.end(); ++ordersIterator)
                 if (ordersIterator->second == *hillIterator)
-                {   
+                {
                     movingOut = true;
                     break;
                 }
@@ -176,33 +202,6 @@ void Bot::doTurn()
                 }
         }
     }
-
-    // // Move out from our hills
-    // for (Location hillLoc : state.myHills)
-    // {
-    //     for (Location antLoc : state.myAnts)
-    //     {
-    //         vector<Location>::iterator it = find(state.myHills.begin(), state.myHills.end(), antLoc);
-    //         if (it != state.myHills.end())
-    //         {
-    //             // Check that we are not already moving the ant
-    //             movingOut = false;
-    //             for (ordersIterator = orders.begin(); ordersIterator != orders.end(); ++ordersIterator)
-    //                 if (ordersIterator->second == antLoc)
-    //                 {
-    //                     movingOut = true;
-    //                     break;
-    //                 }
-    //
-    //             if (!movingOut)
-    //                 for (int d = 0; d < TDIRECTIONS; ++d)
-    //                 {
-    //                     if (doMoveDirection(antLoc, d))
-    //                         break;
-    //                 }
-    //         }
-    //     }
-    // }
 };
 
 bool Bot::cmpRoutes(const Route& lhs, const Route& rhs)
@@ -214,7 +213,7 @@ ostream& operator<<(ostream& os, const Route& route)
 {
     os << get<0>(route) << " " << get<1>(route) << " " << get<2>(route);
     return os;
-};
+}
 
 //finishes the turn
 void Bot::endTurn()
@@ -224,4 +223,4 @@ void Bot::endTurn()
     state.turn++;
 
     cout << "go" << endl;
-};
+}

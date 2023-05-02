@@ -9,7 +9,7 @@
 #include "Bimap.h"
 #include "State.h"
 #include "Location.h"
-//#include "Astar.h"
+#include "Astar.h"
 
 using namespace std;
 typedef tuple< Location, Location, double > Route;
@@ -19,10 +19,10 @@ typedef tuple< Location, Location, double > Route;
 struct Bot
 {
     State state;
-
     map< Location, Location > orders;
     set< Location > unseen;
     Bimap< Location, Location > targets;
+    Astar astarObj;
 
     Bot();
 
