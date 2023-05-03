@@ -135,7 +135,7 @@ void Bot::doTurn()
     vector<Route> unseenRoutes(unseen.size(), make_tuple(Location(), Location(), 0));
     for (size_t antIdx = 0; antIdx < state.myAnts.size(); ++antIdx)
     {
-        if (state.timer.getTime() > 650)
+        if (state.timer.getTime() > 700)
             break;
         // Check that we are not already moving the ant
         movingOut = false;
@@ -169,7 +169,7 @@ void Bot::doTurn()
         vector<Location>::iterator it = find(state.myAnts.begin(), state.myAnts.end(), *hillIterator);
         if (it != state.myAnts.end())
         {
-            if (state.timer.getTime() > 950)
+            if (state.timer.getTime() > 990)
                 break;
             // Check that we are not already moving the ant
             movingOut = false;
