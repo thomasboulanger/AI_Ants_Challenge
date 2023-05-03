@@ -8,27 +8,26 @@
 */
 struct Location
 {
-	int row, col;
+    int row, col;
 
-	Location()
-	{
-		row = col = 0;
-	}
+    Location()
+    {
+        row = col = 0;
+    }
 
-	Location(int r, int c)
-	{
-		row = r;
-		col = c;
-	}
+    Location(int r, int c)
+    {
+        row = r;
+        col = c;
+    }
 
-	bool operator==(const Location & o) const {
-		return row == o.row && col == o.col;
-	}
-	bool operator!=(const Location & o) const {return !(*this == o);}
+    bool operator==(const Location& o) const
+    {
+        return row == o.row && col == o.col;
+    }
+
+    bool operator!=(const Location& o) const { return !(*this == o); }
 };
-
-inline std::ostream & operator<<(std::ostream & out, const Location & loc) {
-	return out << loc.row << ", " << loc.col;
-}
+std::ostream& operator<<(std::ostream& out, const Location& loc);
 
 #endif //LOCATION_H_
